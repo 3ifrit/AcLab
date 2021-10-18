@@ -15,4 +15,5 @@ io.on('connection', (socket) => {
 
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://192.168.43.105:${port}/`);
+  console.log(`Listening on ${http.address().port}`);
 });
