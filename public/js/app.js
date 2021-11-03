@@ -35,7 +35,7 @@ function getRandomInt(max)
 
 function preload() {
     this.load.image('tank', '../assets/tank_blue.png')
-    this.load.image('autreJoueur', `../assets/tank_${color[getRandomInt(5)]}.png`)
+    this.load.image('autreJoueur', `../assets/tank_${color[getRandomInt(color.length)]}.png`)
 }
 
 
@@ -95,7 +95,7 @@ function addJoueur(joueur, infoJoueur)
 
 function addNvJoueur(joueur, infoJoueur)
 {
-    //const couleurRandom = color[getRandomInt(color.length)]
+    // const couleurRandom = color[getRandomInt(color.length)]
     let autreJoueur = joueur.add.sprite(infoJoueur.x, infoJoueur.y, 'autreJoueur').setOrigin(0.5, 0.5).setDisplaySize(60, 40)
 
     autreJoueur.idJoueur = infoJoueur.idJoueur
