@@ -7,9 +7,10 @@ const config = {
         mode: Phaser.Scale.FIT,
         parent: 'phaser-example',
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 1280,
-        height: 720
+        width: /*1280*/window.innerWidth,
+        height: /*720*/window.innerHeight
     },
+    type: Phaser.AUTO,
     physics: {
         default: 'arcade',
         arcade: {
