@@ -8,7 +8,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.53.1/phaser.min.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/manette.js"></script>
+    <script src="manette/joy.js"></script>
 
+    <style>
+        #move {
+            width: 100px;;
+            height: 100px;;
+            
+            position:relative;
+            top : 550px;
+        }
+
+        #aim {
+            width: 100px;;
+            height: 100px;;
+            
+            position:relative;
+            top : 550px;
+            right : 750px;
+        }
+    </style>
 </head>
 <body>
     <h1> Pas Diep.io </h1>
@@ -20,5 +39,8 @@
         <input type="text" id="login" name="pseudo" />
         <button id="entrer"> Entrer </button>
     </div>
+    <div id="move"></div>
+    <div id="aim"></div>
+
 </body>
 </html>
