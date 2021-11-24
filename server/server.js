@@ -11,7 +11,7 @@ const publicPATH = path.join(__dirname, "../public");
 const fichierManette = publicPATH + "/manette.html";
 const fichierEcran = publicPATH + "/ecran.html";
 
-const port = 4000;
+const port = 3000;
 let user;
 let userLogin;
 
@@ -105,6 +105,11 @@ function manette(socket)
 	})
 }
 
+function mouvement(id, x, y)
+{
+	//joueurs[id].x += x;
+	//joueurs[id].y += y;
+}
 
 function ecran(socket) 
 {
@@ -130,6 +135,10 @@ io.on("connection", (socket) => {
            socketGameLoop  = ecran(socket);
         }
     });
+
+	socket.on("mouvement", (x, y) => {
+		mouvement(socket.id, x, y);
+	})
 
     // On supprime un joueur de l'objets joueurs quand il se deconnecte
     socket.on("disconnect", () => {

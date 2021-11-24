@@ -19,6 +19,10 @@ const config = {
 
 var game = new Phaser.Game(config);
 
+var move;
+var aim;
+var direction;
+var pression;
 
 function preload ()
 {
@@ -27,15 +31,15 @@ function preload ()
 
 function create ()
 {
-    main();
-    var move = new JoyStick('move');
-    var aim = new JoyStick('aim');
-
+    ecranConnexion();
+    move = new JoyStick('move');
+    aim = new JoyStick('aim');
 }
 
-function update ()
+function update () 
 {
-    
+    if( (move.getDir) != "C")
+        socket.emit('mouvement', move.GetX, move.GetY); 
 }
 
 function ecranConnexion() {
@@ -47,12 +51,5 @@ function ecranConnexion() {
     boutonEntrer.addEventListener("click", () => {
         socket.emit("manetteLogin", champLogin.value);
         document.getElementById("form").style.display = "none";
-        
     });
 }
-
-function main() {
-    ecranConnexion();
-}
-
-window.onload = main;
