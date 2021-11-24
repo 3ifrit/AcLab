@@ -3,16 +3,15 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 const { text } = require("express");
-
-require('@geckos.io/phaser-on-nodejs')
-const Phaser = require('phaser')
+require("@geckos.io/phaser-on-nodejs")
+const Phaser = require("phaser")
 
 const publicPATH = path.join(__dirname, "../public");
 // const node_mPATH = path.join(__dirname, "../node_modules");
 const fichierManette = publicPATH + "/manette.html";
 const fichierEcran = publicPATH + "/ecran.html";
 
-const port = 3000;
+const port = 4000;
 let user;
 let userLogin;
 
@@ -102,10 +101,7 @@ function manette(socket)
 				y: Math.floor(Math.random() * 500) + 50,
 				id: socket.id,
 				nickname: pseudo,
-			};
-			// console.table(joueurs)
-
-					
+			};	
 	})
 }
 
