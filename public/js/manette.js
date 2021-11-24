@@ -38,9 +38,10 @@ function create ()
 
 function update () 
 {
-    if( (move.getDir) != "C")
-        socket.emit('mouvement', move.GetX, move.GetY); 
-}
+   if( (move.getDir) != "C")
+        socket.emit("mouvement", move.GetX, move.GetY); 
+    
+    }
 
 function ecranConnexion() {
     socket.emit("firstConnection", "manette");

@@ -107,8 +107,8 @@ function manette(socket)
 
 function mouvement(id, x, y)
 {
-	//joueurs[id].x += x;
-	//joueurs[id].y += y;
+	joueurs[id].x += x;
+	joueurs[id].y += y;
 }
 
 function ecran(socket) 
