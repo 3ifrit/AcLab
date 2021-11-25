@@ -19,8 +19,7 @@ function ecranConnexion() {
     });
 }
 
-function manette()
-{
+function manette() {
     move = new JoyStick("move", {
         title: "joystick",
 
@@ -73,24 +72,20 @@ function manette()
         autoReturnToCenter: true,
     });
 
-    let loop = setInterval( () => {
-        if((move.GetDir()) != "C")
-        {
+    let loop = setInterval(() => {
+        if (move.GetDir() != "C") {
             // console.log("test : X ", + move.GetX() + " Y : " + move.GetY());
             socket.emit("mouvementMove", move.GetX(), move.GetY());
-        } 
-        else if((aim.GetDir()) != "C") 
-        {
+        } else if (aim.GetDir() != "C") {
             // console.log("test : X ", + aim.GetX() + " Y : " + aim.GetY());
             socket.emit("mouvementAim", aim.GetX(), aim.GetY());
-        } 
-    }, 2)
+        }
+    }, 2);
 
-    return loop
+    return loop;
 }
 
-function main() 
-{
+function main() {
     ecranConnexion();
     manette();
 }

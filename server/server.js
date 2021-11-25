@@ -9,7 +9,7 @@ const publicPATH = path.join(__dirname, "../public");
 const fichierManette = publicPATH + "/manette.html";
 const fichierEcran = publicPATH + "/ecran.html";
 
-const port = 4000;
+const port = 3000;
 
 // Creation de l'objet joueurs dans laquelle on va stocker toutes les infos de chaque joueur
 let joueurs = {};
@@ -28,77 +28,71 @@ app.get("/", (req, res) => {
 });
 
 app.get("/ecran", (req, res) => {
-	res.sendFile(fichierEcran);
-})
+    res.sendFile(fichierEcran);
+});
 
-function manette(socket) 
-{
-	socket.on("manetteLogin", (pseudo) => {
-		    // Creation d'un joueur d'objet joueurs avec une postition random, login et id
-			joueurs[socket.id] = {
-				// rotation: 0,
-				angle: 0,
-				x: Math.floor(Math.random() * 700) + 50,
-				y: Math.floor(Math.random() * 500) + 50,
-				id: socket.id,
-				nickname: pseudo,
-			};
-			// console.table(joueurs)
-	})
+function manette(socket) {
+    socket.on("manetteLogin", (pseudo) => {
+        // Creation d'un joueur d'objet joueurs avec une postition random, login et id
+        joueurs[socket.id] = {
+            // rotation: 0,
+            angle: 0,
+            x: Math.floor(Math.random() * 700) + 50,
+            y: Math.floor(Math.random() * 500) + 50,
+            id: socket.id,
+            nickname: pseudo,
+        };
+    });
 }
 
-function ecran(socket) 
-{
-	socket.emit("ecranUpdate", joueurs);
+function ecran(socket) {
+    socket.emit("ecranUpdate", joueurs);
 
-	let loop = setInterval( () => {
-		socket.emit("ecranUpdate", joueurs);
-	}, 1000);
+    let loop = setInterval(() => {
+        socket.emit("ecranUpdate", joueurs);
+    }, 1000);
 
-	return loop;
+    return loop;
 }
 
 io.on("connection", (socket) => {
     console.log(`User ${socket.id} just connected.`);
-	let isPlayer = false;
-	let socketGameLoop
+    let isPlayer = false;
+    let socketGameLoop;
 
     socket.on("firstConnection", (data) => {
         if (data === "manette") {
-			isPlayer = true;
+            isPlayer = true;
             manette(socket);
         } else if (data === "ecran") {
-           socketGameLoop  = ecran(socket);
+            socketGameLoop = ecran(socket);
         }
     });
 
-	socket.on("mouvementMove", (x, y) => {
-		joueurs[socket.id].x = x;
-		joueurs[socket.id].y = y;
-	})
+    socket.on("mouvementMove", (x, y) => {
+        joueurs[socket.id].x = x;
+        joueurs[socket.id].y = y;
+    });
 
-	socket.on("mouvementAim", (x, y) => {
-		// console.log("AIM : X = " + x + " Y = " + y);
-		let rad = Math.atan2(y, x);
-		let deg = rad * (180 / Math.PI)
-		// let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
-		// deg2 = deg2 * (2 * Math.PI)
-		joueurs[socket.id].angle = deg
+    socket.on("mouvementAim", (x, y) => {
+        // console.log("AIM : X = " + x + " Y = " + y);
+        let rad = Math.atan2(y, x);
+        let deg = rad * (180 / Math.PI);
+        // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
+        // deg2 = deg2 * (2 * Math.PI)
+        joueurs[socket.id].angle = deg;
 
-		// console.log(joueurs[socket.id]);
-	})
+        // console.log(joueurs[socket.id]);
+    });
 
     // On supprime un joueur de l'objets joueurs quand il se deconnecte
     socket.on("disconnect", () => {
         console.log(`User ${socket.id} has disconnected.`);
-		if(isPlayer)
-		{
-			delete joueurs[socket.id];
-		}
-		else
-		{
-			clearInterval(socketGameLoop)
-		}
+        if (isPlayer) {
+            delete joueurs[socket.id];
+        } else {
+            clearInterval(socketGameLoop);
+        }
     });
 });
 
