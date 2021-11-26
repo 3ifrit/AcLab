@@ -9,14 +9,27 @@ body {
     height: 100%;
 }
 
+h1 {
+    text-align: center;
+}
+
+#form {
+    display: flex;
+    justify-content: center;
+}
+
+#form > * {
+    padding: 8px;
+}
+
 #move {
     width: 200px;
     height: 200px;
     margin: 20px;
 
     position: absolute;
-    top: 500px;
-    left: 10px;
+    bottom: 0;
+    left: 0;
 
     visibility: hidden;
 }
@@ -27,8 +40,8 @@ body {
     margin: 20px;
 
     position: absolute;
-    top: 500px;
-    left: 550px;
+    bottom: 0;
+    right: 0;
 
     visibility: hidden;
 }
@@ -39,6 +52,19 @@ body {
 
 #rotate > img {
     width: 50%;
+}
+
+#manette-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
 }
 
 @media screen and (max-width: 760px) {
