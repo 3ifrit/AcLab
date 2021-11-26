@@ -56,6 +56,7 @@ function create()
         {
             let player = joueursCourants[joueur]
             joueursCourants[joueur].tank = this.add.image(player.x, player.y, 'tank').setDisplaySize(60, 40);
+            joueursCourants[joueur].tank.angle= player.angle;
         }
     })
     

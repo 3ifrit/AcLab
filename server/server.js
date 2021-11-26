@@ -70,13 +70,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("mouvementMove", (x, y) => {
-        joueurs[socket.id].x = x;
-        joueurs[socket.id].y = y;
+        joueurs[socket.id].x += x/100;
+        joueurs[socket.id].y -= y/100;
     });
 
     socket.on("mouvementAim", (x, y) => {
         // console.log("AIM : X = " + x + " Y = " + y);
-        let rad = Math.atan2(y, x);
+        let rad = Math.atan2(-x, -y);
         let deg = rad * (180 / Math.PI);
         // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
         // deg2 = deg2 * (2 * Math.PI)
