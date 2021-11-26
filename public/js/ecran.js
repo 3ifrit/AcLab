@@ -14,7 +14,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: {y: 0}
+            gravity: {y: 150}
         }
     },
     scene: {
@@ -29,7 +29,6 @@ let tank
 let couleur = ["green", "blue", "red", "dark", "sand"]
 let couleurRand = getRandomInt(couleur.length)
 
-
 // Dev mozilla Math.random()
 function getRandomInt(max) 
 {
@@ -39,12 +38,25 @@ function getRandomInt(max)
 function preload() 
 {
     this.load.image('tank', '../assets/tank_blue.png')
+    this.load.image('sand', '../assets/tileSand1.png')
+    this.load.image('baril', '../assets/barrelBlack_side.png')
     // this.load.image('tank', `../assets/tank_${couleur[getRandomInt(couleur.length)]}.png`)
 }
 
 
 function create() 
 {
+    sprite = this.add.image(50, 50, 'sand');
+    
+    sprite.setScale(50);
+    obstacles = this.physics.add.staticGroup();
+
+    obstacles.create(600, 100, 'baril')
+    obstacles.create(1000, 501, 'baril')
+
+    obstacles.create(255, 400, 'baril')
+
+
     socket.on("ecranUpdate", (joueurs) => {
         for (const joueur in joueursCourants)
         {
@@ -59,6 +71,10 @@ function create()
             joueursCourants[joueur].tank.angle= player.angle;
         }
     })
+
+    //this.physics.add.collider(player, player);
+    //this.physics.add.collider(player, obstacles);
+
     
 }
 

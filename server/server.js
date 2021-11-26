@@ -75,14 +75,14 @@ io.on("connection", (socket) => {
     });
 
     socket.on("mouvementAim", (x, y) => {
-        // console.log("AIM : X = " + x + " Y = " + y);
-        let rad = Math.atan2(-x, -y);
-        let deg = rad * (180 / Math.PI);
-        // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
-        // deg2 = deg2 * (2 * Math.PI)
-        joueurs[socket.id].angle = deg;
+       // console.log("AIM : X = " + x + " Y = " + y);
+       let rad = Math.atan2(-x, -y);
+       let deg = rad * (180 / Math.PI);
+       // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
+       // deg2 = deg2 * (2 * Math.PI)
+       joueurs[socket.id].angle = deg;
 
-        // console.log(joueurs[socket.id]);
+       // console.log(joueurs[socket.id]);
     });
 
     // On supprime un joueur de l'objets joueurs quand il se deconnecte
