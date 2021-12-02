@@ -35,8 +35,9 @@ function manette(socket) {
     socket.on("manetteLogin", (pseudo) => {
         // Creation d'un joueur d'objet joueurs avec une postition random, login et id
         joueurs[socket.id] = {
-            // rotation: 0,
+            rotation: 0,
             angle: 0,
+            vitesse: 0,
             x: Math.floor(Math.random() * 700) + 50,
             y: Math.floor(Math.random() * 500) + 50,
             id: socket.id,
@@ -69,20 +70,19 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("mouvementMove", (x, y) => {
-        joueurs[socket.id].x += x/100;
-        joueurs[socket.id].y -= y/100;
+    socket.on("mouvementMove", (move) => {
+        console.log(move.direction);
     });
 
-    socket.on("mouvementAim", (x, y) => {
-       // console.log("AIM : X = " + x + " Y = " + y);
-       let rad = Math.atan2(-x, -y);
-       let deg = rad * (180 / Math.PI);
-       // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
-       // deg2 = deg2 * (2 * Math.PI)
-       joueurs[socket.id].angle = deg;
-
-       // console.log(joueurs[socket.id]);
+    socket.on("mouvementAim", (aim) => {
+        // console.log("AIM : X = " + x + " Y = " + y);
+        //    let rad = Math.atan2(-x, -y);
+        //    let deg = rad * (180 / Math.PI);
+        // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
+        // deg2 = deg2 * (2 * Math.PI)
+        //    joueurs[socket.id].angle = deg;
+        // console.log(joueurs[socket.id]);
+        console.log(aim.angle);
     });
 
     // On supprime un joueur de l'objets joueurs quand il se deconnecte

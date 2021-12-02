@@ -1,9 +1,86 @@
 const socket = io();
 
-let move;
-let aim;
-let direction;
+let joySticks = [];
+let moveJoyStick;
+let aimJoyStick;
 let pression;
+let angle;
+let rotation;
+class Manette extends Phaser.Scene {
+    constructor() {
+        super({
+            key: "examples",
+        });
+    }
+
+    preload() {
+        let url = "../lib/rexvirtualjoystickplugin.min.js";
+        this.load.plugin("rexvirtualjoystickplugin", url, true);
+    }
+
+    create() {
+        this.input.addPointer(1);
+        moveJoyStick = CreateJoyStick(this, 100, 400);
+        aimJoyStick = CreateJoyStick(this, 350, 400);
+    }
+
+    update() {
+        let moveCursorKey = moveJoyStick.createCursorKeys();
+        let aimCursorKey = aimJoyStick.createCursorKeys();
+
+        for (let direction in moveCursorKey) {
+            if (moveCursorKey[direction].isDown) {
+                socket.emit(
+                    "mouvementMove",
+                    move(direction, moveJoyStick.force)
+                );
+            }
+        }
+
+        for (let direction in aimCursorKey) {
+            if (aimCursorKey[direction].isDown) {
+                socket.emit(
+                    "mouvementAim",
+                    aim(aimJoyStick.angle, aimJoyStick.rotation)
+                );
+            }
+        }
+    }
+}
+
+let CreateJoyStick = (scene, x, y) => {
+    return scene.plugins.get("rexvirtualjoystickplugin").add(scene, {
+        x: x,
+        y: y,
+        radius: 25,
+        base: scene.add.circle(0, 0, 50, 0x7a7a7a),
+        thumb: scene.add.circle(0, 0, 25, 0xcccccc),
+        dir: "8dir", // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
+        // forceMin: 16,
+        // enable: true
+    });
+};
+
+let move = (dir, press) => {
+    return { direction: dir, pression: press };
+};
+
+let aim = (deg, rot) => {
+    return { angle: deg, rotation: rot };
+};
+
+const config = {
+    type: Phaser.AUTO,
+    scale: {
+        parent: "phaser-example",
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        mode: Phaser.Scale.FIT,
+        width: window.innerWidth,
+        height: window.innerHeight,
+    },
+    scene: Manette,
+    backgroundColor: 0xffffff,
+};
 
 function ecranConnexion() {
     socket.emit("firstConnection", "manette");
@@ -13,81 +90,13 @@ function ecranConnexion() {
 
     boutonEntrer.addEventListener("click", () => {
         socket.emit("manetteLogin", champLogin.value);
-        document.getElementById("form").style.display = "none";
-        document.getElementById("move").style.visibility = "visible";
-        document.getElementById("aim").style.visibility = "visible";
+        document.getElementById("manette-screen").style.display = "none";
+        new Phaser.Game(config);
     });
-}
-
-function manette() {
-    move = new JoyStick("move", {
-        title: "joystick",
-
-        // width/height
-        width: undefined,
-        height: undefined,
-
-        // Internal color of Stick
-        internalFillColor: "#3381ff",
-
-        // Border width of Stick
-        internalLineWidth: 2,
-
-        // Border color of Stick
-        internalStrokeColor: "#3381ff",
-
-        // External reference circonference width
-        externalLineWidth: 2,
-
-        //External reference circonference color
-        externalStrokeColor: "#3381ff",
-
-        // Sets the behavior of the stick
-        autoReturnToCenter: true,
-    });
-
-    aim = new JoyStick("aim", {
-        title: "joystick",
-
-        // width/height
-        width: undefined,
-        height: undefined,
-
-        // Internal color of Stick
-        internalFillColor: "#ff3333",
-
-        // Border width of Stick
-        internalLineWidth: 2,
-
-        // Border color of Stick
-        internalStrokeColor: "#ff3333",
-
-        // External reference circonference width
-        externalLineWidth: 2,
-
-        //External reference circonference color
-        externalStrokeColor: "#ff3333",
-
-        // Sets the behavior of the stick
-        autoReturnToCenter: true,
-    });
-
-    let loop = setInterval(() => {
-        if (move.GetDir() != "C") {
-            // console.log("test : X ", + move.GetX() + " Y : " + move.GetY());
-            socket.emit("mouvementMove", move.GetX(), move.GetY());
-        } else if (aim.GetDir() != "C") {
-            // console.log("test : X ", + aim.GetX() + " Y : " + aim.GetY());
-            socket.emit("mouvementAim", aim.GetX(), aim.GetY());
-        }
-    }, 2);
-
-    return loop;
 }
 
 function main() {
     ecranConnexion();
-    manette();
 }
 
 window.onload = main;
