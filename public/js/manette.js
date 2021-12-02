@@ -20,8 +20,8 @@ class Manette extends Phaser.Scene {
 
     create() {
         this.input.addPointer(1);
-        moveJoyStick = CreateJoyStick(this, 100, 400);
-        aimJoyStick = CreateJoyStick(this, 350, 400);
+        moveJoyStick = CreateJoyStick(this, window.innerWidth/4, window.innerHeight/4*3);
+        aimJoyStick = CreateJoyStick(this, window.innerWidth/4*3, window.innerHeight/4*3);
     }
 
     update() {
@@ -45,6 +45,7 @@ class Manette extends Phaser.Scene {
                 );
             }
         }
+        
     }
 }
 
@@ -73,8 +74,8 @@ const config = {
     type: Phaser.AUTO,
     scale: {
         parent: "phaser-example",
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        mode: Phaser.Scale.FIT,
+        //autoCenter: Phaser.Scale.CENTER_BOTH,
+        //mode: Phaser.Scale.FIT,
         width: window.innerWidth,
         height: window.innerHeight,
     },
@@ -95,8 +96,21 @@ function ecranConnexion() {
     });
 }
 
+function updateJoysticksCoordinates() {
+    document.getElementById("rotate").style.width= window.innerWidth;
+    document.getElementById("rotate").style.height= window.innerHeight;
+    moveJoyStick.y= window.innerHeight/4*3;
+    moveJoyStick.x= window.innerWidth/4;
+    aimJoyStick.y= window.innerHeight/4*3;
+    aimJoyStick.x= window.innerWidth/4*3;
+} 
+
 function main() {
     ecranConnexion();
+    window.onorientationchange = function(event) {
+        //updateJoysticksCoordinates();
+    };
+    //updateJoysticksCoordinates();
 }
 
 window.onload = main;
