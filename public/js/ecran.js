@@ -1,4 +1,4 @@
-let socket = io();
+const socket = io();
 
 let joueursCourants = {};
 
@@ -14,7 +14,7 @@ const config = {
     physics: {
         default: "arcade",
         arcade: {
-            gravity: { y: 150 },
+            gravity: { y: 0 },
         },
     },
     scene: {
@@ -35,7 +35,10 @@ function getRandomInt(max) {
 }
 
 function preload() {
-    this.load.image("tank", "../assets/tank_blue.png");
+    this.load.spritesheet("tank", "../assets/tank_red.png", {
+        frameWidth: 500,
+        frameHeight: 500,
+    });
     this.load.image("sand", "../assets/tileSand1.png");
     this.load.image("baril", "../assets/barrelBlack_side.png");
     // this.load.image('tank', `../assets/tank_${couleur[getRandomInt(couleur.length)]}.png`)
@@ -56,26 +59,28 @@ function create() {
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank.destroy();
+            // console.log(player);
         }
         joueursCourants = joueurs;
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
-            joueursCourants[joueur].tank = this.add
+            player.tank = this.physics.add
                 .sprite(player.x, player.y, "tank")
                 .setDisplaySize(60, 40);
-            joueursCourants[joueur].tank.angle = player.angle;
+
+            player.tank.body.collideWorldBounds = true;
+            // joueursCourants[joueur].tank.body.collideWorldBounds = true;
+            player.tank.angle = player.angle;
+            this.physics.add.collider(player.tank, player.tank);
+            // this.physics.add.collider(player.tank, obstacles);
         }
     });
-
-    //this.physics.add.collider(player, player);
-    //this.physics.add.collider(player, obstacles);
-
-    // socket.on("mouvementMove", (move) => {
-    //    console.log(move.direction);
-    // });
 }
 
-function update() {}
+function update() 
+{
+
+}
 
 function ecranConnexion() {
     socket.emit("firstConnection", "ecran");
@@ -83,7 +88,7 @@ function ecranConnexion() {
 
 function main() {
     ecranConnexion();
-    let game = new Phaser.Game(config);
+    new Phaser.Game(config);
 }
 
 window.onload = main;

@@ -2,7 +2,6 @@ const path = require("path");
 const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
-const { text } = require("express");
 
 const publicPATH = path.join(__dirname, "../public");
 // const node_mPATH = path.join(__dirname, "../node_modules");
@@ -12,7 +11,7 @@ const fichierEcran = publicPATH + "/ecran.html";
 const port = 3000;
 
 // Creation de l'objet joueurs dans laquelle on va stocker toutes les infos de chaque joueur
-let joueurs = {};
+// let joueurs = {};
 
 let app = express();
 let server = http.createServer(app);
@@ -31,71 +30,119 @@ app.get("/ecran", (req, res) => {
     res.sendFile(fichierEcran);
 });
 
-function manette(socket) {
-    socket.on("manetteLogin", (pseudo) => {
-        // Creation d'un joueur d'objet joueurs avec une postition random, login et id
-        joueurs[socket.id] = {
-            rotation: 0,
-            angle: 0,
-            vitesse: 0,
-            x: Math.floor(Math.random() * 700) + 50,
-            y: Math.floor(Math.random() * 500) + 50,
-            id: socket.id,
-            nickname: pseudo,
-        };
-    });
+require("@geckos.io/phaser-on-nodejs");
+const Phaser = require("phaser");
+const { Scene } = require("phaser");
+
+class Tank extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y) {
+        super(scene, x, y, "");
+
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+
+        this.body.setSize(60, 40);
+    }
 }
 
-function ecran(socket) {
-    socket.emit("ecranUpdate", joueurs);
+class ServerPhaser extends Phaser.Scene {
+    #is_game
+    #socket_ecran
+    #joueurs
 
-    let loop = setInterval(() => {
-        socket.emit("ecranUpdate", joueurs);
-    }, 1000);
+    constructor() {
+        super();
+        this.#is_game = false;
+        this.#socket_ecran = null;
+        this.#joueurs = {};
+    }
 
-    return loop;
+    create() {
+        this.physics.world.setBounds(0, 0, 1280, 720);
+
+        io.on("connection", (socket) => {
+            console.log(`User ${socket.id} just connected.`);
+            let isPlayer = false;
+            let socketGameLoop;
+            const x = Math.floor(Math.random() * 800) + 50;
+            const y = Math.floor(Math.random() * 500) + 50;
+            const tank = new Tank(this, 50, 50);
+
+            socket.on("firstConnection", (data) => {
+                if (data === "manette") {
+                    isPlayer = true;
+
+                    socket.on("manetteLogin", (pseudo) => {
+                        // Creation d'un joueur d'objet joueurs avec une postition random, login et id
+                        this.#joueurs[socket.id] = {
+                            rotation: 0,
+                            angle: 0,
+                            vitesse: 0,
+                            x: x,
+                            y: y,
+                            id: socket.id,
+                            nickname: pseudo,
+                            tank: tank
+                        };
+                    });
+                } else if (data === "ecran") {
+                    this.#is_game = true;
+                    this.#socket_ecran = socket;
+                }
+            });
+
+            socket.on("mouvement", (move, aim) => {
+                this.#joueurs[socket.id].x += move.dX * 1;
+                this.#joueurs[socket.id].y += move.dY * 1;
+
+                this.#joueurs[socket.id].angle = aim.angle 
+            })
+
+            // On supprime un joueur de l'objets joueurs quand il se deconnecte
+            socket.on("disconnect", () => {
+                console.log(`User ${socket.id} has disconnected.`);
+                if (isPlayer) {
+                    delete this.#joueurs[socket.id];
+                } else {
+                    clearInterval(socketGameLoop);
+                }
+            });
+        });
+    }
+
+    update() 
+    {
+        if(this.#is_game)
+        {
+            this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
+        }
+    }
 }
 
-io.on("connection", (socket) => {
-    console.log(`User ${socket.id} just connected.`);
-    let isPlayer = false;
-    let socketGameLoop;
+const config = {
+    type: Phaser.HEADLESS,
+    width: 1280,
+    height: 720,
+    banner: false,
+    audio: false,
+    scene: [ServerPhaser],
+    physics: {
+        default: "arcade",
+        arcade: {
+            gravity: { y: 0 },
+        },
+    },
+};
 
-    socket.on("firstConnection", (data) => {
-        if (data === "manette") {
-            isPlayer = true;
-            manette(socket);
-        } else if (data === "ecran") {
-            socketGameLoop = ecran(socket);
-        }
-    });
-
-    socket.on("mouvementMove", (move) => {
-        console.log(move.direction);
-    });
-
-    socket.on("mouvementAim", (aim) => {
-        // console.log("AIM : X = " + x + " Y = " + y);
-        //    let rad = Math.atan2(-x, -y);
-        //    let deg = rad * (180 / Math.PI);
-        // let deg2 = (Math.atan2(y, x)) * (180 / Math.PI)
-        // deg2 = deg2 * (2 * Math.PI)
-        //    joueurs[socket.id].angle = deg;
-        // console.log(joueurs[socket.id]);
-        console.log(aim.angle);
-    });
-
-    // On supprime un joueur de l'objets joueurs quand il se deconnecte
-    socket.on("disconnect", () => {
-        console.log(`User ${socket.id} has disconnected.`);
-        if (isPlayer) {
-            delete joueurs[socket.id];
-        } else {
-            clearInterval(socketGameLoop);
-        }
-    });
-});
 
 server.listen(port, () => {
     console.log(`Listening on ${server.address().port}`);
 });
+
+function main() {
+    console.log("Hello there");
+    // console.log(new Phaser.Game(config))
+    new Phaser.Game(config);
+}
+
+window.onload = main;

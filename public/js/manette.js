@@ -6,6 +6,7 @@ let aimJoyStick;
 let pression;
 let angle;
 let rotation;
+
 class Manette extends Phaser.Scene {
     constructor() {
         super({
@@ -24,28 +25,13 @@ class Manette extends Phaser.Scene {
         aimJoyStick = CreateJoyStick(this, window.innerWidth/4*3, window.innerHeight/4*3);
     }
 
-    update() {
-        let moveCursorKey = moveJoyStick.createCursorKeys();
-        let aimCursorKey = aimJoyStick.createCursorKeys();
-
-        for (let direction in moveCursorKey) {
-            if (moveCursorKey[direction].isDown) {
-                socket.emit(
-                    "mouvementMove",
-                    move(direction, moveJoyStick.force)
-                );
-            }
+    update() 
+    {
+        if(!moveJoyStick.noKey || !aimJoyStick.noKey)
+        {
+            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick))
         }
 
-        for (let direction in aimCursorKey) {
-            if (aimCursorKey[direction].isDown) {
-                socket.emit(
-                    "mouvementAim",
-                    aim(aimJoyStick.angle, aimJoyStick.rotation)
-                );
-            }
-        }
-        
     }
 }
 
@@ -58,17 +44,24 @@ let CreateJoyStick = (scene, x, y) => {
         thumb: scene.add.circle(0, 0, 25, 0xcccccc),
         dir: "8dir", // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
         // forceMin: 16,
-        // enable: true
+        // enable: false
     });
 };
 
-let move = (dir, press) => {
-    return { direction: dir, pression: press };
+let move = (joy) => {
+    return {
+        dX : joy.forceX / joy.force,
+        dY : joy.forceY / joy.force,
+    };
 };
 
-let aim = (deg, rot) => {
-    return { angle: deg, rotation: rot };
-};
+let aim = (joy) =>
+{
+    return {
+        angle: joy.angle,
+        rotation: joy.rotation
+    }
+}
 
 const config = {
     type: Phaser.AUTO,
