@@ -33,10 +33,11 @@ class Manette extends Phaser.Scene {
         );
     }
 
-    update() {
+    update()
+     {
+
         if (!moveJoyStick.noKey || !aimJoyStick.noKey) {
-            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick));
-        }
+            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick));        }
     }
 }
 

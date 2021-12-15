@@ -66,7 +66,7 @@ function create() {
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank = this.physics.add
-                .sprite(player.x, player.y, "tank")
+                .sprite(player.tank.x, player.tank.y, "tank")
                 .setDisplaySize(60, 40);
             player.healthbar= this.add.text(player.x-20,player.y-50,player.health,{fill: "#000000"});
             player.tank.body.collideWorldBounds = true;
