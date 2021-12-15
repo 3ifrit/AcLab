@@ -95,13 +95,8 @@ class ServerPhaser extends Phaser.Scene {
             });
 
             socket.on("mouvement", (move, aim) => {
-                let X = 0;
-                let Y = 0;
-                X += move.dX * 20;
-                Y += move.dY * 20;
-
-                this.#joueurs[socket.id].tank.setVelocityX(X)
-                this.#joueurs[socket.id].tank.setVelocityY(Y)
+                this.#joueurs[socket.id].tank.setVelocityX(move.dX * 30)
+                this.#joueurs[socket.id].tank.setVelocityY(move.dY * 30)
 
                 this.#joueurs[socket.id].angle = aim.angle;
             });

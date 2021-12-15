@@ -33,11 +33,15 @@ class Manette extends Phaser.Scene {
         );
     }
 
-    update()
-     {
-
+    update() {
         if (!moveJoyStick.noKey || !aimJoyStick.noKey) {
-            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick));        }
+            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick));
+        }
+        else 
+        {
+            socket.emit("mouvement", move(moveJoyStick), {angle: angle});
+        }
+        
     }
 }
 
@@ -62,6 +66,7 @@ let move = (joy) => {
 };
 
 let aim = (joy) => {
+    angle = joy.angle - 90;
     return {
         angle: joy.angle - 90,
     };

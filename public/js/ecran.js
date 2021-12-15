@@ -68,9 +68,15 @@ function create() {
             player.tank = this.physics.add
                 .sprite(player.tank.x, player.tank.y, "tank")
                 .setDisplaySize(60, 40);
-            player.healthbar= this.add.text(player.x-20,player.y-50,player.health,{fill: "#000000"});
+            player.healthbar = this.add.text(
+                player.tank.x - 20,
+                player.tank.y - 50,
+                player.health,
+                { fill: "#000000" }
+            );
             player.tank.body.collideWorldBounds = true;
-            player.tank.angle = player.angle;
+            player.tank.setAngle(player.angle)
+            // player.tank.setRotation(player.angle)
             this.physics.add.collider(player.tank, player.tank);
             // this.physics.add.collider(player.tank, obstacles);
         }
