@@ -1,0 +1,22 @@
+{
+  "name": "np3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/server.js"
+  },
+  "author": "RanyG961",
+  "license": "ISC",
+  "dependencies": {
+    "@geckos.io/phaser-on-nodejs": "^1.2.3",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7",
+    "phaser": "^3.24.1",
+    "socket.io": "^4.0.0"
+  },
+  "devDependencies": {
+    "phaser3-rex-plugins": "^1.1.41"
+  }
+}
