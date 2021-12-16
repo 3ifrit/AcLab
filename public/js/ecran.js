@@ -48,14 +48,11 @@ function create() {
     sprite = this.add.image(50, 50, "sand");
 
     sprite.setScale(50);
-    obstacles = this.physics.add.staticGroup();
+    
 
-    obstacles.create(600, 100, "baril");
-    obstacles.create(1000, 501, "baril");
-
-    obstacles.create(255, 400, "baril");
-
-    socket.on("ecranUpdate", (joueurs) => {
+    socket.on("ecranUpdate", (joueurs, obstacles) => {
+        platforms = this.physics.add.staticGroup();
+        platforms.create(obstacles[0].x, obstacles[0].y, 'baril');
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank.destroy();
@@ -77,8 +74,8 @@ function create() {
             player.tank.body.collideWorldBounds = true;
             player.tank.setAngle(player.angle)
             // player.tank.setRotation(player.angle)
-            this.physics.add.collider(player.tank, player.tank);
-            // this.physics.add.collider(player.tank, obstacles);
+            this.physics.add.collider(player, platforms);
+
         }
     });
 }

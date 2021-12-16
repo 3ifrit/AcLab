@@ -45,20 +45,46 @@ class Tank extends Phaser.Physics.Arcade.Sprite {
     }
 }
 
+class Obstacle extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y) {
+        super(scene, x, y, "");
+
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+
+        this.body.setSize(60, 80);
+    }
+}
+
 class ServerPhaser extends Phaser.Scene {
     #is_game;
     #socket_ecran;
     #joueurs;
+    #obstacles;
 
     constructor() {
         super();
         this.#is_game = false;
         this.#socket_ecran = null;
         this.#joueurs = {};
+        this.#obstacles = {};
+
+
     }
 
     create() {
+        this.load.image(path.join(__dirname, "../public/assets/barrelBlack_side.png"));
+
         this.physics.world.setBounds(0, 0, 1280, 720);
+
+        
+        const obstacle = new Obstacle(this, 200, 200);
+
+        this.#obstacles[0] = {
+            obstacle : obstacle,
+            x : obstacle.x,
+            y : obstacle.y
+        }
 
         io.on("connection", (socket) => {
             console.log(`User ${socket.id} just connected.`);
@@ -87,6 +113,7 @@ class ServerPhaser extends Phaser.Scene {
                             healthbar: healthbar,
                             health: 100
                         };
+
                     });
                 } else if (data === "ecran") {
                     this.#is_game = true;
@@ -115,7 +142,7 @@ class ServerPhaser extends Phaser.Scene {
 
     update() {
         if (this.#is_game) {
-            this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
+            this.#socket_ecran.emit("ecranUpdate", this.#joueurs, this.#obstacles);
         }
     }
 }
