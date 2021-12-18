@@ -24,10 +24,11 @@ const config = {
     },
 };
 
-let cursor;
+let cursors;
 let tank;
 let couleur = ["green", "blue", "red", "dark", "sand"];
 let couleurRand = getRandomInt(couleur.length);
+let j;
 
 // Dev mozilla Math.random()
 function getRandomInt(max) {
@@ -46,18 +47,20 @@ function preload() {
 
 function create() {
     sprite = this.add.image(50, 50, "sand");
-
     sprite.setScale(50);
     
+    platforms = this.physics.add.staticGroup();
+
+    //  Now let's create some ledges
+    platforms.create(600, 400, 'baril');
+    platforms.create(50, 250, 'baril');
+    platforms.create(750, 220, 'baril');
 
     socket.on("ecranUpdate", (joueurs, obstacles) => {
-        platforms = this.physics.add.staticGroup();
-        platforms.create(obstacles[0].x, obstacles[0].y, 'baril');
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank.destroy();
             player.healthbar.destroy();
-            // console.log(player);
         }
         joueursCourants = joueurs;
         for (const joueur in joueursCourants) {
@@ -71,13 +74,14 @@ function create() {
                 player.health,
                 { fill: "#000000" }
             );
-            player.tank.body.collideWorldBounds = true;
+            player.tank.setCollideWorldBounds(true);
             player.tank.setAngle(player.angle)
-            // player.tank.setRotation(player.angle)
             this.physics.add.collider(player, platforms);
-
         }
     });
+
+    cursors = this.input.keyboard.createCursorKeys();
+
 }
 
 function update() {}
