@@ -95,7 +95,8 @@ class ServerPhaser extends Phaser.Scene {
                             nickname: pseudo,
                             tank: tank,
                             healthbar: healthbar,
-                            health: 100
+                            health: 100,
+                            tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);
                     });
@@ -111,6 +112,11 @@ class ServerPhaser extends Phaser.Scene {
 
                 this.#joueurs[socket.id].angle = aim.angle;
             });
+            
+            socket.on("tir", (etat) => {
+                console.log(etat);
+                this.#joueurs[socket.id].tir = etat;
+            })
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte
             socket.on("disconnect", () => {

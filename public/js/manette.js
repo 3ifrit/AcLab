@@ -6,6 +6,7 @@ let aimJoyStick;
 let pression;
 let angle;
 let rotation;
+let tirButton;
 
 class Manette extends Phaser.Scene {
     constructor() {
@@ -17,6 +18,7 @@ class Manette extends Phaser.Scene {
     preload() {
         let url = "../lib/rexvirtualjoystickplugin.min.js";
         this.load.plugin("rexvirtualjoystickplugin", url, true);
+        this.load.plugin('rexbuttonplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbuttonplugin.min.js', true);
     }
 
     create() {
@@ -31,6 +33,9 @@ class Manette extends Phaser.Scene {
             (window.innerWidth / 4) * 3,
             (window.innerHeight / 4) * 3
         );
+        tirButton = createBtn(this, {
+            
+        });
     }
 
     update() {
@@ -42,7 +47,36 @@ class Manette extends Phaser.Scene {
             socket.emit("mouvement", move(moveJoyStick), {angle: angle});
         }
         
+    
+        tirButton.button.on('click', () => {
+            tirButton.button.toggleEnable();
+            socket.emit("tir", tirButton.button.enable);
+        });
+        
     }
+}
+
+var createBtn = function (scene, config) {
+    var x = 500;
+    var y = 200;
+    var color = 0xcccc00;
+    var name = 'TIR';
+
+    var btn = scene.add.rectangle(x, y, 120, 120, color)
+        .setName(name);
+    scene.add.text(x, y, name, {
+        fontSize: '20pt'
+    })
+        .setOrigin(0.5, 0.5)
+
+    btn.button = scene.plugins.get('rexbuttonplugin').add(btn, {
+        enable : true,
+        clickInterval: 1000,
+    });
+
+    
+    
+    return btn;
 }
 
 let CreateJoyStick = (scene, x, y) => {
