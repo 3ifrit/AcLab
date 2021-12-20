@@ -1,6 +1,7 @@
 const socket = io();
 
 let joueursCourants = {};
+let tirsCourants = {};
 
 const config = {
     scale: {
@@ -43,6 +44,7 @@ function preload() {
     this.load.image("sand", "../assets/tileSand1.png");
     this.load.image("baril", "../assets/barrelBlack_side.png");
     // this.load.image('tank', `../assets/tank_${couleur[getRandomInt(couleur.length)]}.png`)
+    this.load.image("bullet", "../assets/bulletDark2.png");
 }
 
 function create() {
@@ -56,7 +58,8 @@ function create() {
     platforms.create(50, 250, 'baril');
     platforms.create(750, 220, 'baril');
 
-    socket.on("ecranUpdate", (joueurs, obstacles) => {
+    socket.on("ecranUpdate", (joueurs, bullets) => {
+        // affichage joueurs
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank.destroy();
@@ -67,7 +70,7 @@ function create() {
             let player = joueursCourants[joueur];
             player.tank = this.physics.add
                 .sprite(player.tank.x, player.tank.y, "tank")
-                .setDisplaySize(60, 40);
+                .setDisplaySize(38, 46);
             player.healthbar = this.add.text(
                 player.tank.x - 20,
                 player.tank.y - 50,
@@ -77,6 +80,21 @@ function create() {
             player.tank.setCollideWorldBounds(true);
             player.tank.setAngle(player.angle)
             this.physics.add.collider(player, platforms);
+        }
+
+        // affichage tirs
+        for (const i in tirsCourants) {
+            let tir = tirsCourants[i];
+            tir.bullet.destroy();
+        }
+        tirsCourants = bullets;
+        for (const i in tirsCourants) {
+            let tir = tirsCourants[i];
+            tir.bullet = this.physics.add
+                .sprite(tir.bullet.x, tir.bullet.y, "bullet")
+                .setDisplaySize(16,24);
+            //tir.bullet.setCollideWorldBounds(true);
+            //this.physics.add.collider(tir, platforms);
         }
     });
 

@@ -33,6 +33,7 @@ app.get("/ecran", (req, res) => {
 require("@geckos.io/phaser-on-nodejs");
 const Phaser = require("phaser");
 const { Scene } = require("phaser");
+const { timeStamp } = require("console");
 
 class Tank extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
@@ -41,7 +42,18 @@ class Tank extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.body.setSize(60, 40);
+        this.body.setSize(38,46);
+    }
+}
+
+class Bullet extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y) {
+        super(scene, x, y, "");
+
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+
+        this.body.setSize(16,24);
     }
 }
 
@@ -49,12 +61,14 @@ class ServerPhaser extends Phaser.Scene {
     #is_game;
     #socket_ecran;
     #joueurs;
+    #bullets;
 
     constructor() {
         super();
         this.#is_game = false;
         this.#socket_ecran = null;
         this.#joueurs = {};
+        this.#bullets = {};
     }
 
     preload(){
@@ -78,6 +92,7 @@ class ServerPhaser extends Phaser.Scene {
             const y = Math.floor(Math.random() * 500) + 50;
             const tank = new Tank(this, 50, 50);
             const healthbar = new Phaser.GameObjects.Text(this,x,y,"100");
+            const sc = this;
 
             socket.on("firstConnection", (data) => {
                 if (data === "manette") {
@@ -116,6 +131,24 @@ class ServerPhaser extends Phaser.Scene {
             socket.on("tir", (etat) => {
                 console.log(etat);
                 this.#joueurs[socket.id].tir = etat;
+                // on crée un objet bullet
+                //const bullet= new Bullet(this.scene,this.#joueurs[socket.id].x,this.#joueurs[socket.id].y);
+                const bullet = new Bullet(sc,this.#joueurs[socket.id].x,this.#joueurs[socket.id].y);
+                console.log(`tir de ${socket.id}`);
+                const x = this.#joueurs[socket.id].x;
+                const y = this.#joueurs[socket.id].y;
+                const sender = this.#joueurs[socket.id];
+                const angle = this.#joueurs[socket.id].rotation;
+                this.#bullets[socket.id] = {
+                    //angle: this.#joueurs[socket.id].angle,
+                    angle: angle,
+                    vitesse: 1, // A MODIF
+                    x: x,
+                    y: y,
+                    bullet: bullet,
+                    id: socket.id,
+                    damage: 10
+                }
             })
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte
@@ -132,7 +165,7 @@ class ServerPhaser extends Phaser.Scene {
 
     update() {
         if (this.#is_game) {
-            this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
+            this.#socket_ecran.emit("ecranUpdate", this.#joueurs, this.#bullets);
         }
     }
 }
