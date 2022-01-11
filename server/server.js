@@ -62,6 +62,7 @@ class ServerPhaser extends Phaser.Scene {
     #socket_ecran;
     #joueurs;
     #bullets;
+    #bullet_speed = 256; // constant : all bullets have same speed
 
     constructor() {
         super();
@@ -111,7 +112,8 @@ class ServerPhaser extends Phaser.Scene {
                             tank: tank,
                             healthbar: healthbar,
                             health: 100,
-                            tir : false
+                            nb_tirs: 0,
+                            //tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);
                     });
@@ -121,34 +123,36 @@ class ServerPhaser extends Phaser.Scene {
                 }
             });
 
-            socket.on("mouvement", (move, aim) => {
-                this.#joueurs[socket.id].tank.setVelocityX(move.dX * 30)
-                this.#joueurs[socket.id].tank.setVelocityY(move.dY * 30)
+            socket.on("mouvement", (move) => {
+                this.#joueurs[socket.id].tank.setVelocityX(move.dX * 64)
+                this.#joueurs[socket.id].tank.setVelocityY(move.dY * 64)
+            });
 
+            socket.on("rotation", (aim) => {
                 this.#joueurs[socket.id].angle = aim.angle;
+                this.#joueurs[socket.id].tank.angle = aim.angle;
             });
             
-            socket.on("tir", (etat) => {
-                console.log(etat);
-                this.#joueurs[socket.id].tir = etat;
+            socket.on("tir", (/*etat*/) => {
+                //console.log(etat);
+                //this.#joueurs[socket.id].tir = etat;
                 // on crée un objet bullet
-                //const bullet= new Bullet(this.scene,this.#joueurs[socket.id].x,this.#joueurs[socket.id].y);
-                const bullet = new Bullet(sc,this.#joueurs[socket.id].x,this.#joueurs[socket.id].y);
+                const bullet = new Bullet(sc,this.#joueurs[socket.id].tank.x,this.#joueurs[socket.id].tank.y);
                 console.log(`tir de ${socket.id}`);
-                const x = this.#joueurs[socket.id].x;
-                const y = this.#joueurs[socket.id].y;
-                const sender = this.#joueurs[socket.id];
-                const angle = this.#joueurs[socket.id].rotation;
+                const x = this.#joueurs[socket.id].tank.x;
+                const y = this.#joueurs[socket.id].tank.y;
+                const angle = this.#joueurs[socket.id].tank.angle;
+                console.log(angle);
                 this.#bullets[socket.id] = {
-                    //angle: this.#joueurs[socket.id].angle,
                     angle: angle,
-                    vitesse: 1, // A MODIF
                     x: x,
                     y: y,
                     bullet: bullet,
                     id: socket.id,
                     damage: 10
                 }
+                this.#bullets[socket.id].bullet.setVelocityX(this.#bullet_speed*Math.cos(angle));
+                this.#bullets[socket.id].bullet.setVelocityY(this.#bullet_speed*Math.sin(angle));
             })
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte
@@ -196,4 +200,3 @@ function main() {
 }
 
 window.onload = main;
-2

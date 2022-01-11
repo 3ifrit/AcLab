@@ -93,6 +93,7 @@ function create() {
             tir.bullet = this.physics.add
                 .sprite(tir.bullet.x, tir.bullet.y, "bullet")
                 .setDisplaySize(16,24);
+            tir.bullet.setAngle(tir.angle);
             //tir.bullet.setCollideWorldBounds(true);
             //this.physics.add.collider(tir, platforms);
         }

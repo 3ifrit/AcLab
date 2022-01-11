@@ -39,18 +39,20 @@ class Manette extends Phaser.Scene {
     }
 
     update() {
-        if (!moveJoyStick.noKey || !aimJoyStick.noKey) {
-            socket.emit("mouvement", move(moveJoyStick), aim(aimJoyStick));
+        if (aimJoyStick.noKey & moveJoyStick.noKey) {
+            socket.emit("mouvement", move(moveJoyStick));
+        } else {
+            if (!moveJoyStick.noKey) {
+                socket.emit("mouvement", move(moveJoyStick));
+            }
+            if (!aimJoyStick.noKey) {
+                socket.emit("rotation", aim(aimJoyStick));
+            }
         }
-        else 
-        {
-            socket.emit("mouvement", move(moveJoyStick), {angle: angle});
-        }
-        
     
         tirButton.button.on('click', () => {
-            tirButton.button.toggleEnable();
-            socket.emit("tir", tirButton.button.enable);
+            //tirButton.button.toggleEnable();
+            socket.emit("tir"/*, tirButton.button.enable*/);
         });
         
     }
