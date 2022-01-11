@@ -61,8 +61,9 @@ class ServerPhaser extends Phaser.Scene {
     #is_game;
     #socket_ecran;
     #joueurs;
+    #tank_speed = 64;
     #bullets;
-    #bullet_speed = 256; // constant : all bullets have same speed
+    #bullet_speed = 512; // constant : all bullets have same speed
 
     constructor() {
         super();
@@ -124,13 +125,14 @@ class ServerPhaser extends Phaser.Scene {
             });
 
             socket.on("mouvement", (move) => {
-                this.#joueurs[socket.id].tank.setVelocityX(move.dX * 64)
-                this.#joueurs[socket.id].tank.setVelocityY(move.dY * 64)
+                this.#joueurs[socket.id].tank.setVelocityX(move.dX * this.#tank_speed)
+                this.#joueurs[socket.id].tank.setVelocityY(move.dY * this.#tank_speed)
             });
 
             socket.on("rotation", (aim) => {
                 this.#joueurs[socket.id].angle = aim.angle;
                 this.#joueurs[socket.id].tank.angle = aim.angle;
+                console.log(this.#joueurs[socket.id].tank.angle);
             });
             
             socket.on("tir", (/*etat*/) => {
@@ -141,8 +143,8 @@ class ServerPhaser extends Phaser.Scene {
                 console.log(`tir de ${socket.id}`);
                 const x = this.#joueurs[socket.id].tank.x;
                 const y = this.#joueurs[socket.id].tank.y;
-                const angle = this.#joueurs[socket.id].tank.angle;
-                console.log(angle);
+                var angle = this.#joueurs[socket.id].tank.angle;
+                //console.log(angle);
                 this.#bullets[socket.id] = {
                     angle: angle,
                     x: x,
@@ -151,8 +153,8 @@ class ServerPhaser extends Phaser.Scene {
                     id: socket.id,
                     damage: 10
                 }
-                this.#bullets[socket.id].bullet.setVelocityX(this.#bullet_speed*Math.cos(angle));
-                this.#bullets[socket.id].bullet.setVelocityY(this.#bullet_speed*Math.sin(angle));
+                this.#bullets[socket.id].bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
+                this.#bullets[socket.id].bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
             })
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte

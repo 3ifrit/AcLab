@@ -7,6 +7,8 @@ let pression;
 let angle;
 let rotation;
 let tirButton;
+let fired = false;
+let fireInterval = 50; // milliseconds
 
 class Manette extends Phaser.Scene {
     constructor() {
@@ -52,7 +54,11 @@ class Manette extends Phaser.Scene {
     
         tirButton.button.on('click', () => {
             //tirButton.button.toggleEnable();
-            socket.emit("tir"/*, tirButton.button.enable*/);
+            if (!fired) {
+                socket.emit("tir"/*, tirButton.button.enable*/);
+                fired = true;
+            }
+            setTimeout(() => {fired = false},fireInterval);
         });
         
     }
