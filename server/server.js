@@ -149,22 +149,33 @@ class ServerPhaser extends Phaser.Scene {
                 bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
                 bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
 
-                this.physics.add.collider(bullet, this.platforms,() => {bullet.destroy()});
-                for (const i in this.#joueurs) {
-                    const joueur = this.#joueurs[i];
-                    if (i!=socket.id)
-                        this.physics.add.collider(bullet, joueur.tank,() => {bullet.destroy()});
-                }
+                this.physics.add.collider(bullet, this.platforms,() => {
+                    bullet.destroy();
+                    const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                    this.#joueurs[socket.id].bullets.splice(index,1);
+                });
 
-                //add bullet in the player bullet array
-                this.#joueurs[socket.id].bullets.push({
+                let new_bullet = {
                     angle: angle,
                     x: x,
                     y: y,
                     bullet: bullet,
                     id: socket.id,
                     damage: 10
-                });
+                };
+
+                for (const i in this.#joueurs) {
+                    const joueur = this.#joueurs[i];
+                    if (i!=socket.id)
+                        this.physics.add.collider(bullet, joueur.tank,() => {
+                            bullet.destroy();
+                            const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                            this.#joueurs[socket.id].bullets.splice(index,1);
+                        });
+                }
+
+                //add bullet in the player bullet array
+                this.#joueurs[socket.id].bullets.push(new_bullet);
                 
             })
 
