@@ -62,7 +62,6 @@ class ServerPhaser extends Phaser.Scene {
     #socket_ecran;
     #joueurs;
     #tank_speed = 64;
-    #bullets;
     #bullet_speed = 512; // constant : all bullets have same speed
 
     constructor() {
@@ -70,7 +69,6 @@ class ServerPhaser extends Phaser.Scene {
         this.#is_game = false;
         this.#socket_ecran = null;
         this.#joueurs = {};
-        this.#bullets = {};
     }
 
     preload(){
@@ -95,6 +93,7 @@ class ServerPhaser extends Phaser.Scene {
             const tank = new Tank(this, 50, 50);
             const healthbar = new Phaser.GameObjects.Text(this,x,y,"100");
             const sc = this;
+            var bullets = new Array();
 
             socket.on("firstConnection", (data) => {
                 if (data === "manette") {
@@ -114,6 +113,8 @@ class ServerPhaser extends Phaser.Scene {
                             healthbar: healthbar,
                             health: 100,
                             nb_tirs: 0,
+                            bullets: bullets,
+
                             //tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);
@@ -144,17 +145,27 @@ class ServerPhaser extends Phaser.Scene {
                 const x = this.#joueurs[socket.id].tank.x;
                 const y = this.#joueurs[socket.id].tank.y;
                 var angle = this.#joueurs[socket.id].tank.angle;
-                //console.log(angle);
-                this.#bullets[socket.id] = {
+                
+                bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
+                bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
+
+                this.physics.add.collider(bullet, this.platforms,() => {bullet.destroy()});
+                for (const i in this.#joueurs) {
+                    const joueur = this.#joueurs[i];
+                    if (i!=socket.id)
+                        this.physics.add.collider(bullet, joueur.tank,() => {bullet.destroy()});
+                }
+
+                //add bullet in the player bullet array
+                this.#joueurs[socket.id].bullets.push({
                     angle: angle,
                     x: x,
                     y: y,
                     bullet: bullet,
                     id: socket.id,
                     damage: 10
-                }
-                this.#bullets[socket.id].bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
-                this.#bullets[socket.id].bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
+                });
+                
             })
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte
@@ -171,7 +182,7 @@ class ServerPhaser extends Phaser.Scene {
 
     update() {
         if (this.#is_game) {
-            this.#socket_ecran.emit("ecranUpdate", this.#joueurs, this.#bullets);
+            this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
         }
     }
 }

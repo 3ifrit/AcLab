@@ -8,7 +8,7 @@ let angle;
 let rotation;
 let tirButton;
 let fired = false;
-let fireInterval = 50; // milliseconds
+let fireInterval = 100; // milliseconds
 
 class Manette extends Phaser.Scene {
     constructor() {
@@ -79,7 +79,7 @@ var createBtn = function (scene, config) {
 
     btn.button = scene.plugins.get('rexbuttonplugin').add(btn, {
         enable : true,
-        clickInterval: 1000,
+        clickInterval: fireInterval,
     });
 
     

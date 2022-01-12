@@ -1,7 +1,7 @@
 const socket = io();
 
 let joueursCourants = {};
-let tirsCourants = {};
+
 
 const config = {
     scale: {
@@ -58,12 +58,16 @@ function create() {
     platforms.create(50, 250, 'baril');
     platforms.create(750, 220, 'baril');
 
-    socket.on("ecranUpdate", (joueurs, bullets) => {
+    socket.on("ecranUpdate", (joueurs) => {
         // affichage joueurs
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
             player.tank.destroy();
             player.healthbar.destroy();
+            for (const i in player.bullets) {
+                let tir = player.bullets[i];
+                tir.bullet.destroy();
+            }
         }
         joueursCourants = joueurs;
         for (const joueur in joueursCourants) {
@@ -79,24 +83,21 @@ function create() {
             );
             player.tank.setCollideWorldBounds(true);
             player.tank.setAngle(player.angle)
-            this.physics.add.collider(player, platforms);
+            //this.physics.add.collider(player, platforms);
+            
+            // affichage tirs du joueur
+            for (const i in player.bullets) {
+                let tir = player.bullets[i];
+                tir.bullet = this.physics.add
+                    .sprite(tir.bullet.x, tir.bullet.y, "bullet")
+                    .setDisplaySize(16,24);
+                tir.bullet.setAngle(tir.angle+180);
+                tir.bullet.setCollideWorldBounds(true);
+                this.physics.add.collider(tir, platforms);
+                this.physics.add.collider(player, tir);
+            }
         }
 
-        // affichage tirs
-        for (const i in tirsCourants) {
-            let tir = tirsCourants[i];
-            tir.bullet.destroy();
-        }
-        tirsCourants = bullets;
-        for (const i in tirsCourants) {
-            let tir = tirsCourants[i];
-            tir.bullet = this.physics.add
-                .sprite(tir.bullet.x, tir.bullet.y, "bullet")
-                .setDisplaySize(16,24);
-            tir.bullet.setAngle(tir.angle+180);
-            //tir.bullet.setCollideWorldBounds(true);
-            //this.physics.add.collider(tir, platforms);
-        }
     });
 
     cursors = this.input.keyboard.createCursorKeys();
