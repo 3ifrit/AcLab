@@ -114,6 +114,7 @@ class ServerPhaser extends Phaser.Scene {
                             health: 100,
                             nb_tirs: 0,
                             bullets: bullets,
+                            nb_kills : 0,
 
                             //tir : false
                         };
@@ -133,7 +134,7 @@ class ServerPhaser extends Phaser.Scene {
             socket.on("rotation", (aim) => {
                 this.#joueurs[socket.id].angle = aim.angle;
                 this.#joueurs[socket.id].tank.angle = aim.angle;
-                console.log(this.#joueurs[socket.id].tank.angle);
+                //console.log(this.#joueurs[socket.id].tank.angle);
             });
             
             socket.on("tir", (/*etat*/) => {
@@ -141,7 +142,7 @@ class ServerPhaser extends Phaser.Scene {
                 //this.#joueurs[socket.id].tir = etat;
                 // on crée un objet bullet
                 const bullet = new Bullet(sc,this.#joueurs[socket.id].tank.x,this.#joueurs[socket.id].tank.y);
-                console.log(`tir de ${socket.id}`);
+                //console.log(`tir de ${socket.id}`);
                 const x = this.#joueurs[socket.id].tank.x;
                 const y = this.#joueurs[socket.id].tank.y;
                 var angle = this.#joueurs[socket.id].tank.angle;
@@ -171,6 +172,14 @@ class ServerPhaser extends Phaser.Scene {
                             bullet.destroy();
                             const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
                             this.#joueurs[socket.id].bullets.splice(index,1);
+                            joueur.health -= 10;
+                            if(joueur.health == 0){
+                                this.#joueurs[socket.id].nb_kills++;
+
+                                joueur.tank.destroy();
+                                joueur.health = 100;
+                                joueur.tank = new Tank(this, 50, 50);
+                            }
                         });
                 }
 

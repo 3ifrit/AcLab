@@ -66,8 +66,8 @@ class Manette extends Phaser.Scene {
 }
 
 var createBtn = function (scene, config) {
-    var x = 500;
-    var y = 200;
+    var x = 0;
+    var y = 0;
     var color = 0xcccc00;
     var name = 'TIR';
 
