@@ -19,8 +19,9 @@ class Manette extends Phaser.Scene {
 
     preload() {
         let url = "../lib/rexvirtualjoystickplugin.min.js";
+        let urlButton = "../lib/rexbuttonplugin.min.js";
         this.load.plugin("rexvirtualjoystickplugin", url, true);
-        this.load.plugin('rexbuttonplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbuttonplugin.min.js', true);
+        this.load.plugin('rexbuttonplugin', urlButton, true);
     }
 
     create() {
