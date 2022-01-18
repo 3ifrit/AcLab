@@ -63,12 +63,19 @@ class ServerPhaser extends Phaser.Scene {
     #joueurs;
     #tank_speed = 64;
     #bullet_speed = 512; // constant : all bullets have same speed
+    #kills_equipe;
 
     constructor() {
         super();
         this.#is_game = false;
         this.#socket_ecran = null;
         this.#joueurs = {};
+        this.#kills_equipe = {
+            1 : 0,
+            2 : 0,
+            3 : 0,
+            4 : 0,
+        };
     }
 
     preload(){
@@ -115,7 +122,7 @@ class ServerPhaser extends Phaser.Scene {
                             nb_tirs: 0,
                             bullets: bullets,
                             nb_kills : 0,
-
+                            equipe : Math.floor(Math.random() * 4) + 1,
                             //tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);
@@ -167,7 +174,7 @@ class ServerPhaser extends Phaser.Scene {
 
                 for (const i in this.#joueurs) {
                     const joueur = this.#joueurs[i];
-                    if (i!=socket.id)
+                    if (i!=socket.id && joueur.equipe != this.#joueurs[socket.id].equipe)
                         this.physics.add.collider(bullet, joueur.tank,() => {
                             bullet.destroy();
                             const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
@@ -175,10 +182,11 @@ class ServerPhaser extends Phaser.Scene {
                             joueur.health -= 10;
                             if(joueur.health == 0){
                                 this.#joueurs[socket.id].nb_kills++;
-
+                                this.#kills_equipe[this.#joueurs[socket.id].equipe]++;
                                 joueur.tank.destroy();
                                 joueur.health = 100;
                                 joueur.tank = new Tank(this, 50, 50);
+
                             }
                         });
                 }
@@ -204,13 +212,31 @@ class ServerPhaser extends Phaser.Scene {
         if (this.#is_game) {
             this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
         }
+        if(this.#kills_equipe[1] == 5){
+            this.physics.pause();
+        }
+        if(this.#kills_equipe[2] == 5){
+            this.physics.pause();
+ 
+        }
+        if(this.#kills_equipe[3] == 5){
+            this.physics.pause();
+ 
+        }
+        if(this.#kills_equipe[4] == 5){
+            this.physics.pause();
+
+        }
+        if(this.game.getTime() / 1000 >= 300){
+            this.physics.pause();
+        }
     }
 }
 
 const config = {
     type: Phaser.HEADLESS,
-    width: 1280,
-    height: 720,
+    width: window.innerWidth,
+    height: window.innerHeight,
     banner: false,
     audio: false,
     scene: [ServerPhaser],

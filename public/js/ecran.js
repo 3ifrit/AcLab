@@ -37,7 +37,19 @@ function getRandomInt(max) {
 }
 
 function preload() {
-    this.load.spritesheet("tank", "../assets/tank_red.png", {
+    this.load.spritesheet("tank_red", "../assets/tank_red.png", {
+        frameWidth: 500,
+        frameHeight: 500,
+    });
+    this.load.spritesheet("tank_blue", "../assets/tank_blue.png", {
+        frameWidth: 500,
+        frameHeight: 500,
+    });
+    this.load.spritesheet("tank_green", "../assets/tank_green.png", {
+        frameWidth: 500,
+        frameHeight: 500,
+    });
+    this.load.spritesheet("tank_sand", "../assets/tank_sand.png", {
         frameWidth: 500,
         frameHeight: 500,
     });
@@ -72,9 +84,26 @@ function create() {
         joueursCourants = joueurs;
         for (const joueur in joueursCourants) {
             let player = joueursCourants[joueur];
-            player.tank = this.physics.add
-                .sprite(player.tank.x, player.tank.y, "tank")
-                .setDisplaySize(38, 46);
+            if(player.equipe == 1){
+                player.tank = this.physics.add
+                    .sprite(player.tank.x, player.tank.y, "tank_red")
+                    .setDisplaySize(38, 46);
+            }
+            else if(player.equipe == 2){
+                player.tank = this.physics.add
+                    .sprite(player.tank.x, player.tank.y, "tank_green")
+                    .setDisplaySize(38, 46);
+            }
+            else if(player.equipe == 3){
+                player.tank = this.physics.add
+                    .sprite(player.tank.x, player.tank.y, "tank_blue")
+                    .setDisplaySize(38, 46);
+            }
+            else if(player.equipe == 4){
+                player.tank = this.physics.add
+                    .sprite(player.tank.x, player.tank.y, "tank_sand")
+                    .setDisplaySize(38, 46);
+            }
             player.healthbar = this.add.text(
                 player.tank.x - 20,
                 player.tank.y - 50,
