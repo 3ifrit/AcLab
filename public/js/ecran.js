@@ -116,9 +116,7 @@ function create() {
                 player.health,
                 { fill: "#000000" }
             );
-            player.tank.setCollideWorldBounds(true);
             player.tank.setAngle(player.angle)
-            //this.physics.add.collider(player, platforms);
             
             // affichage tirs du joueur
             for (const i in player.bullets) {
@@ -127,9 +125,6 @@ function create() {
                     .sprite(tir.bullet.x, tir.bullet.y, "bullet")
                     .setDisplaySize(16,24);
                 tir.bullet.setAngle(tir.angle+180);
-                tir.bullet.setCollideWorldBounds(true);
-                this.physics.add.collider(tir, platforms);
-                this.physics.add.collider(player, tir);
             }
         }
 

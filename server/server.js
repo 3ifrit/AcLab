@@ -174,15 +174,6 @@ class ServerPhaser extends Phaser.Scene {
                 const x = this.#joueurs[socket.id].tank.x;
                 const y = this.#joueurs[socket.id].tank.y;
                 var angle = this.#joueurs[socket.id].tank.angle;
-                
-                bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
-                bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
-
-                this.physics.add.collider(bullet, this.platforms,() => {
-                    bullet.destroy();
-                    const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
-                    this.#joueurs[socket.id].bullets.splice(index,1);
-                });
 
                 let new_bullet = {
                     angle: angle,
@@ -192,6 +183,25 @@ class ServerPhaser extends Phaser.Scene {
                     id: socket.id,
                     damage: 10
                 };
+
+                bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
+                bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
+
+                bullet.setCollideWorldBounds(true);
+                bullet.body.onWorldBounds= true;
+                bullet.body.world.on("worldbounds", (body) => {
+                    if (body===bullet.body) {
+                        bullet.destroy();
+                        const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                        this.#joueurs[socket.id].bullets.splice(index,1);
+                    }
+                }, bullet);
+
+                this.physics.add.collider(bullet, this.platforms,() => {
+                    bullet.destroy();
+                    const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                    this.#joueurs[socket.id].bullets.splice(index,1);
+                });
 
                 for (const i in this.#joueurs) {
                     const joueur = this.#joueurs[i];
