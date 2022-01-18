@@ -206,7 +206,7 @@ class ServerPhaser extends Phaser.Scene {
                                 this.#kills_equipe[this.#joueurs[socket.id].equipe]++;
                                 joueur.tank.destroy();
                                 joueur.health = 100;
-                                joueur.tank = new Tank(this, 50, 50);
+                                joueur.tank = new Tank(this, this.joueur.x, this.joueur.y);
 
                             }
                         });
