@@ -71,10 +71,10 @@ class ServerPhaser extends Phaser.Scene {
         this.#socket_ecran = null;
         this.#joueurs = {};
         this.#kills_equipe = {
-            1 : 0,
-            2 : 0,
-            3 : 0,
-            4 : 0,
+            1 : 0, // rouge
+            2 : 0, // vert
+            3 : 0, // bleu
+            4 : 0, // jaune
         };
     }
 
@@ -95,9 +95,30 @@ class ServerPhaser extends Phaser.Scene {
             console.log(`User ${socket.id} just connected.`);
             let isPlayer = false;
             let socketGameLoop;
-            const x = Math.floor(Math.random() * 800) + 50;
-            const y = Math.floor(Math.random() * 500) + 50;
-            const tank = new Tank(this, 50, 50);
+
+            const equipe = Math.floor(Math.random() * 4) + 1;
+            let x, y;
+
+            switch(equipe) {
+                case 1:
+                    x = 50;
+                    y = 50;
+                    break;
+                case 2:
+                    x = 50;
+                    y = window.innerHeight - 50;
+                    break;
+                case 3:
+                    x = window.innerWidth - 50;
+                    y = 50;
+                    break;
+                case 4:
+                    x = window.innerWidth - 50;
+                    y = window.innerHeight - 50;
+                    break;
+            }
+            
+            const tank = new Tank(this, x, y);
             const healthbar = new Phaser.GameObjects.Text(this,x,y,"100");
             const sc = this;
             var bullets = new Array();
@@ -122,7 +143,7 @@ class ServerPhaser extends Phaser.Scene {
                             nb_tirs: 0,
                             bullets: bullets,
                             nb_kills : 0,
-                            equipe : Math.floor(Math.random() * 4) + 1,
+                            equipe : equipe,
                             //tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);

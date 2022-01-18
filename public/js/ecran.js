@@ -62,6 +62,12 @@ function preload() {
 function create() {
     sprite = this.add.image(50, 50, "sand");
     sprite.setScale(50);
+
+    this.add.rectangle(100, 100, 200, 200, 0xff0000); // rouge
+    this.add.rectangle(100, window.innerHeight - 100, 200, 200, 0x00ff00); // vert
+    this.add.rectangle(window.innerWidth - 100, 100, 200, 200, 0x0000ff); // bleu
+    this.add.rectangle(window.innerWidth - 100, window.innerHeight - 100, 200, 200, 0xffff00); // jaune
+
     
     platforms = this.physics.add.staticGroup();
 
