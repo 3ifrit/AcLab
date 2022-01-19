@@ -32,8 +32,11 @@ app.get("/ecran", (req, res) => {
 
 require("@geckos.io/phaser-on-nodejs");
 const Phaser = require("phaser");
-const { Scene } = require("phaser");
+const { Scene, Game } = require("phaser");
 const { timeStamp } = require("console");
+
+let screen_width = 1280;
+let screen_height = 720;
 
 class Tank extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
@@ -42,7 +45,7 @@ class Tank extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.body.setSize(38,46);
+        this.body.setSize(19,23);
     }
 }
 
@@ -53,7 +56,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.body.setSize(16,24);
+        this.body.setSize(8,12);
     }
 }
 
@@ -61,11 +64,11 @@ class ServerPhaser extends Phaser.Scene {
     #is_game;
     #socket_ecran;
     #joueurs;
-    #tank_speed = 64;
-    #bullet_speed = 512; // constant : all bullets have same speed
+    #tank_speed = 32;
+    #bullet_speed = 256; // constant : all bullets have same speed
     #kills_equipe;
     #kill_limit = 5;
-    #game_duration = 300; // en secondes
+    #game_duration = 10; // en secondes
 
     constructor() {
         super();
@@ -81,12 +84,12 @@ class ServerPhaser extends Phaser.Scene {
     }
 
     preload(){
-        this.load.image('baril', path.join(__dirname, "../public/assets/barrelBlack_side.png"));
+       
     }
 
     create() {
 
-        this.physics.world.setBounds(0, 0, 1280, 720);
+        this.physics.world.setBounds(0, 0, window.innerWidth, window.innerHeight);
   
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(600, 400, 'baril');
@@ -103,20 +106,20 @@ class ServerPhaser extends Phaser.Scene {
 
             switch(equipe) {
                 case 1:
-                    x = 50;
-                    y = 50;
+                    x = screen_width/8;
+                    y = screen_height/8;
                     break;
                 case 2:
-                    x = 50;
-                    y = window.innerHeight - 50;
+                    x = screen_width/8;
+                    y = screen_height*7/8;
                     break;
                 case 3:
-                    x = window.innerWidth - 50;
-                    y = 50;
+                    x = screen_width*7/8;
+                    y = screen_height/8;
                     break;
                 case 4:
-                    x = window.innerWidth - 50;
-                    y = window.innerHeight - 50;
+                    x = screen_width*7/8;
+                    y = screen_height*7/8;
                     break;
             }
             
@@ -125,6 +128,14 @@ class ServerPhaser extends Phaser.Scene {
             const healthbar = new Phaser.GameObjects.Text(this,x,y,"100");
             const sc = this;
             var bullets = new Array();
+
+            socket.on("dimensions_yield",(dimensions) => {
+                screen_width = dimensions.width;
+                screen_height = dimensions.height;
+                this.physics.world.setBounds(0, 0, screen_width, screen_height, true, true, true, true);
+                this.cameras.main.setBounds(0, 0, screen_width, screen_height);
+                console.log("screen dimensions changed !");
+            });
 
             socket.on("firstConnection", (data) => {
                 if (data === "manette") {
@@ -255,33 +266,14 @@ class ServerPhaser extends Phaser.Scene {
         if (this.#is_game) {
             this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
         }
-        if (this.#kills_equipe[1] == this.#kill_limit){
-            this.physics.pause();
-            this.#socket_ecran.emit("endOfGame", {
-                type : "score",
-                equipe : 1
-            });
-        }
-        if (this.#kills_equipe[2] == this.#kill_limit){
-            this.physics.pause();
-            this.#socket_ecran.emit("endOfGame", {
-                type : "score",
-                equipe : 2
-            });
-        }
-        if (this.#kills_equipe[3] == this.#kill_limit){
-            this.physics.pause();
-            this.#socket_ecran.emit("endOfGame", {
-                type : "score",
-                equipe : 3
-            });
-        }
-        if (this.#kills_equipe[4] == this.#kill_limit){
-            this.physics.pause();
-            this.#socket_ecran.emit("endOfGame", {
-                type : "score",
-                equipe : 4
-            });
+        for (let i=1;i<=4;i++) {
+            if (this.#kills_equipe[i] == this.#kill_limit){
+                this.physics.pause();
+                this.#socket_ecran.emit("endOfGame", {
+                    type : "score",
+                    equipe : i
+                });
+            }
         }
         if (this.game.getTime() / 1000 >= this.#game_duration){
             this.physics.pause();
@@ -294,8 +286,8 @@ class ServerPhaser extends Phaser.Scene {
 
 const config = {
     type: Phaser.HEADLESS,
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: 1280,
+    height: 720,
     banner: false,
     audio: false,
     scene: [ServerPhaser],

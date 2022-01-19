@@ -8,8 +8,8 @@ const config = {
         mode: Phaser.Scale.FIT,
         parent: "phaser-example",
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: /*1280*/ window.innerWidth,
-        height: /*720*/ window.innerHeight,
+        width: window.innerWidth,
+        height: window.innerHeight,
     },
     type: Phaser.AUTO,
     physics: {
@@ -93,26 +93,26 @@ function create() {
             if(player.equipe == 1){
                 player.tank = this.physics.add
                     .sprite(player.tank.x, player.tank.y, "tank_red")
-                    .setDisplaySize(38, 46);
+                    .setDisplaySize(19, 23);
             }
             else if(player.equipe == 2){
                 player.tank = this.physics.add
                     .sprite(player.tank.x, player.tank.y, "tank_green")
-                    .setDisplaySize(38, 46);
+                    .setDisplaySize(19, 23);
             }
             else if(player.equipe == 3){
                 player.tank = this.physics.add
                     .sprite(player.tank.x, player.tank.y, "tank_blue")
-                    .setDisplaySize(38, 46);
+                    .setDisplaySize(19, 23);
             }
             else if(player.equipe == 4){
                 player.tank = this.physics.add
                     .sprite(player.tank.x, player.tank.y, "tank_sand")
-                    .setDisplaySize(38, 46);
+                    .setDisplaySize(19, 23);
             }
             player.healthbar = this.add.text(
-                player.tank.x - 20,
-                player.tank.y - 50,
+                player.tank.x - 10,
+                player.tank.y - 25,
                 player.health,
                 { fill: "#000000" }
             );
@@ -123,7 +123,7 @@ function create() {
                 let tir = player.bullets[i];
                 tir.bullet = this.physics.add
                     .sprite(tir.bullet.x, tir.bullet.y, "bullet")
-                    .setDisplaySize(16,24);
+                    .setDisplaySize(8,12);
                 tir.bullet.setAngle(tir.angle+180);
             }
         }
@@ -155,6 +155,17 @@ function ecranConnexion() {
 function main() {
     ecranConnexion();
     new Phaser.Game(config);
+    socket.emit("dimensions_yield", {
+        width : window.innerHeight,
+        height : window.innerHeight
+    });
+    window.onresize = () => {
+        location.reload();
+        socket.emit("dimensions_yield", {
+            width : window.innerHeight,
+            height : window.innerHeight
+        });
+    }
 }
 
 window.onload = main;
