@@ -132,6 +132,18 @@ function create() {
 
     cursors = this.input.keyboard.createCursorKeys();
 
+    /* QUAND LA PARTIE EST TERMINEE */
+    socket.on("endOfGame", (data) => {
+        if (data.type === "timeout") {
+            this.add.text(window.innerWidth/2-400,window.innerHeight/2-80,"PARTIE TERMINEE",{
+                fontSize : '80px',
+                strokeThickness : 4,
+                stroke : '#000',
+                align : 'center'
+            });
+        }
+    });
+
 }
 
 function update() {}

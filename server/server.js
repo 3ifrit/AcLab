@@ -64,6 +64,8 @@ class ServerPhaser extends Phaser.Scene {
     #tank_speed = 64;
     #bullet_speed = 512; // constant : all bullets have same speed
     #kills_equipe;
+    #kill_limit = 5;
+    #game_duration = 300; // en secondes
 
     constructor() {
         super();
@@ -119,6 +121,7 @@ class ServerPhaser extends Phaser.Scene {
             }
             
             const tank = new Tank(this, x, y);
+            tank.setCollideWorldBounds(true);
             const healthbar = new Phaser.GameObjects.Text(this,x,y,"100");
             const sc = this;
             var bullets = new Array();
@@ -144,6 +147,7 @@ class ServerPhaser extends Phaser.Scene {
                             bullets: bullets,
                             nb_kills : 0,
                             equipe : equipe,
+                            bullet_damage : 10
                             //tir : false
                         };
                         this.physics.add.collider(this.#joueurs[socket.id].tank, this.platforms);
@@ -155,85 +159,93 @@ class ServerPhaser extends Phaser.Scene {
             });
 
             socket.on("mouvement", (move) => {
-                this.#joueurs[socket.id].tank.setVelocityX(move.dX * this.#tank_speed)
-                this.#joueurs[socket.id].tank.setVelocityY(move.dY * this.#tank_speed)
+                if (this.#joueurs[socket.id] != undefined) {
+                    this.#joueurs[socket.id].tank.setVelocityX(move.dX * this.#tank_speed);
+                    this.#joueurs[socket.id].tank.setVelocityY(move.dY * this.#tank_speed);
+                }
             });
 
             socket.on("rotation", (aim) => {
-                this.#joueurs[socket.id].angle = aim.angle;
-                this.#joueurs[socket.id].tank.angle = aim.angle;
-                //console.log(this.#joueurs[socket.id].tank.angle);
+                if (this.#joueurs[socket.id] != undefined) {
+                    this.#joueurs[socket.id].angle = aim.angle;
+                    this.#joueurs[socket.id].tank.angle = aim.angle;
+                    //console.log(this.#joueurs[socket.id].tank.angle);
+                }
             });
             
             socket.on("tir", (/*etat*/) => {
-                //console.log(etat);
-                //this.#joueurs[socket.id].tir = etat;
-                // on crée un objet bullet
-                const bullet = new Bullet(sc,this.#joueurs[socket.id].tank.x,this.#joueurs[socket.id].tank.y);
-                //console.log(`tir de ${socket.id}`);
-                const x = this.#joueurs[socket.id].tank.x;
-                const y = this.#joueurs[socket.id].tank.y;
-                var angle = this.#joueurs[socket.id].tank.angle;
+                if (this.#joueurs[socket.id] != undefined) {
+                    //console.log(etat);
+                    //this.#joueurs[socket.id].tir = etat;
+                    // on crée un objet bullet
+                    const bullet = new Bullet(sc,this.#joueurs[socket.id].tank.x,this.#joueurs[socket.id].tank.y);
+                    //console.log(`tir de ${socket.id}`);
+                    const x = this.#joueurs[socket.id].tank.x;
+                    const y = this.#joueurs[socket.id].tank.y;
+                    var angle = this.#joueurs[socket.id].tank.angle;
 
-                let new_bullet = {
-                    angle: angle,
-                    x: x,
-                    y: y,
-                    bullet: bullet,
-                    id: socket.id,
-                    damage: 10
-                };
+                    let new_bullet = {
+                        angle: angle,
+                        x: x,
+                        y: y,
+                        bullet: bullet,
+                        id: socket.id
+                    };
 
-                bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
-                bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
+                    bullet.setVelocityX(this.#bullet_speed*Math.cos(angle * 2 * Math.PI / 360 + Math.PI / 2));
+                    bullet.setVelocityY(this.#bullet_speed*Math.sin(angle * 2 * Math.PI / 360 + Math.PI / 2)); 
 
-                bullet.setCollideWorldBounds(true);
-                bullet.body.onWorldBounds= true;
-                bullet.body.world.on("worldbounds", (body) => {
-                    if (body===bullet.body) {
-                        bullet.destroy();
-                        const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
-                        this.#joueurs[socket.id].bullets.splice(index,1);
-                    }
-                }, bullet);
-
-                this.physics.add.collider(bullet, this.platforms,() => {
-                    bullet.destroy();
-                    const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
-                    this.#joueurs[socket.id].bullets.splice(index,1);
-                });
-
-                for (const i in this.#joueurs) {
-                    const joueur = this.#joueurs[i];
-                    if (i!=socket.id && joueur.equipe != this.#joueurs[socket.id].equipe)
-                        this.physics.add.collider(bullet, joueur.tank,() => {
+                    bullet.setCollideWorldBounds(true);
+                    bullet.body.onWorldBounds= true;
+                    bullet.body.world.on("worldbounds", (body) => {
+                        if (body===bullet.body) {
                             bullet.destroy();
                             const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
                             this.#joueurs[socket.id].bullets.splice(index,1);
-                            joueur.health -= 10;
-                            if(joueur.health == 0){
-                                this.#joueurs[socket.id].nb_kills++;
-                                this.#kills_equipe[this.#joueurs[socket.id].equipe]++;
-                                joueur.tank.destroy();
-                                joueur.health = 100;
-                                joueur.tank = new Tank(this, this.joueur.x, this.joueur.y);
+                        }
+                    }, bullet);
 
-                            }
-                        });
+                    this.physics.add.collider(bullet, this.platforms,() => {
+                        bullet.destroy();
+                        const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                        this.#joueurs[socket.id].bullets.splice(index,1);
+                    });
+
+                    for (const i in this.#joueurs) {
+                        const joueur = this.#joueurs[i];
+                        if (i!=socket.id && joueur.equipe != this.#joueurs[socket.id].equipe)
+                            this.physics.add.collider(bullet, joueur.tank,() => {
+                                bullet.destroy();
+                                joueur.health -= this.#joueurs[socket.id].bullet_damage;
+                                const index = this.#joueurs[socket.id].bullets.indexOf(new_bullet);
+                                this.#joueurs[socket.id].bullets.splice(index,1);
+                                if(joueur.health == 0){
+                                    this.#joueurs[socket.id].nb_kills++;
+                                    this.#kills_equipe[this.#joueurs[socket.id].equipe]++;
+                                    //joueur.tank.destroy();
+                                    joueur.tank.setActive(false);
+                                    joueur.tank.setVisible(false);
+                                    joueur.health = 100;
+                                    joueur.tank = new Tank(this, joueur.x, joueur.y);
+
+                                }
+                            });
+                    }
+
+                    //add bullet in the player bullet array
+                    this.#joueurs[socket.id].bullets.push(new_bullet);
                 }
-
-                //add bullet in the player bullet array
-                this.#joueurs[socket.id].bullets.push(new_bullet);
-                
-            })
+            });
 
             // On supprime un joueur de l'objets joueurs quand il se deconnecte
             socket.on("disconnect", () => {
-                console.log(`User ${socket.id} has disconnected.`);
-                if (isPlayer) {
-                    delete this.#joueurs[socket.id];
-                } else {
-                    clearInterval(socketGameLoop);
+                if (this.#joueurs[socket.id] != undefined) {
+                    console.log(`User ${socket.id} has disconnected.`);
+                    if (isPlayer) {
+                        delete this.#joueurs[socket.id];
+                    } else {
+                        clearInterval(socketGameLoop);
+                    }
                 }
             });
         });
@@ -243,23 +255,39 @@ class ServerPhaser extends Phaser.Scene {
         if (this.#is_game) {
             this.#socket_ecran.emit("ecranUpdate", this.#joueurs);
         }
-        if(this.#kills_equipe[1] == 5){
+        if (this.#kills_equipe[1] == this.#kill_limit){
             this.physics.pause();
+            this.#socket_ecran.emit("endOfGame", {
+                type : "score",
+                equipe : 1
+            });
         }
-        if(this.#kills_equipe[2] == 5){
+        if (this.#kills_equipe[2] == this.#kill_limit){
             this.physics.pause();
- 
+            this.#socket_ecran.emit("endOfGame", {
+                type : "score",
+                equipe : 2
+            });
         }
-        if(this.#kills_equipe[3] == 5){
+        if (this.#kills_equipe[3] == this.#kill_limit){
             this.physics.pause();
- 
+            this.#socket_ecran.emit("endOfGame", {
+                type : "score",
+                equipe : 3
+            });
         }
-        if(this.#kills_equipe[4] == 5){
+        if (this.#kills_equipe[4] == this.#kill_limit){
             this.physics.pause();
-
+            this.#socket_ecran.emit("endOfGame", {
+                type : "score",
+                equipe : 4
+            });
         }
-        if(this.game.getTime() / 1000 >= 300){
+        if (this.game.getTime() / 1000 >= this.#game_duration){
             this.physics.pause();
+            this.#socket_ecran.emit("endOfGame", {
+                type : "timeout"
+            })
         }
     }
 }
