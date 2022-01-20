@@ -8,7 +8,7 @@ let angle;
 let rotation;
 let tirButton;
 let fired = false;
-let fireInterval = 100; // milliseconds
+let fireInterval = 1000; // milliseconds
 
 class Manette extends Phaser.Scene {
     constructor() {
@@ -19,9 +19,9 @@ class Manette extends Phaser.Scene {
 
     preload() {
         let url = "../lib/rexvirtualjoystickplugin.min.js";
-        let urlButton = "../lib/rexbuttonplugin.min.js";
+        //let urlButton = "../lib/rexbuttonplugin.min.js";
         this.load.plugin("rexvirtualjoystickplugin", url, true);
-        this.load.plugin('rexbuttonplugin', urlButton, true);
+        //this.load.plugin('rexbuttonplugin', urlButton, true);
     }
 
     create() {
@@ -36,9 +36,12 @@ class Manette extends Phaser.Scene {
             (window.innerWidth / 4) * 3,
             (window.innerHeight / 4) * 3
         );
-        tirButton = createBtn(this, {
-            
-        });
+        /*tirButton = createBtn(
+            this, 
+            (window.innerWidth / 4) * 3,
+            (window.innerHeight / 8) * 4
+        );
+        */
     }
 
     update() {
@@ -50,28 +53,24 @@ class Manette extends Phaser.Scene {
             }
             if (!aimJoyStick.noKey) {
                 socket.emit("rotation", aim(aimJoyStick));
+                if (!fired) {
+                    socket.emit("tir"/*, tirButton.button.enable*/);
+                    fired = true;
+                    setTimeout(() => {fired = false},fireInterval);
+                }
             }
         }
-    
-        tirButton.button.on('click', () => {
-            //tirButton.button.toggleEnable();
-            if (!fired) {
-                socket.emit("tir"/*, tirButton.button.enable*/);
-                fired = true;
-            }
-            setTimeout(() => {fired = false},fireInterval);
-        });
         
     }
 }
 
-var createBtn = function (scene, config) {
-    var x = 0;
-    var y = 0;
+var createBtn = function (scene, x, y, config) {
+    var x = x;
+    var y = y;
     var color = 0xcccc00;
     var name = 'TIR';
 
-    var btn = scene.add.rectangle(x, y, 120, 120, color)
+    var btn = scene.add.circle(x, y, 25, 0xff0000)
         .setName(name);
     scene.add.text(x, y, name, {
         fontSize: '20pt'
@@ -92,7 +91,7 @@ let CreateJoyStick = (scene, x, y) => {
     return scene.plugins.get("rexvirtualjoystickplugin").add(scene, {
         x: x,
         y: y,
-        radius: 25,
+        radius: 35,
         base: scene.add.circle(0, 0, 50, 0x7a7a7a),
         thumb: scene.add.circle(0, 0, 25, 0xcccccc),
         dir: "8dir", // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
